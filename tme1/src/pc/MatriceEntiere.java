@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.DrbgParameters.NextBytes;
 
-import javax.sound.sampled.Line;
-import javax.swing.text.TabableView;
 
 public class MatriceEntiere{
 	private int[][] tab;
@@ -84,8 +81,30 @@ public class MatriceEntiere{
         return mat;
     }
 	
-	
+    @Override
+	public String toString(){
+        String res = "";
+        for (int i=0; i<nbLignes(); i++){
+            for (int j=0; j<nbColonnes(); j++){
+                res+=getElem(i, j);
+            }
+        }
+        return res;
+    }
 
-	
-	
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof MatriceEntiere)) return false;
+        
+        // test valeur par valeur
+        MatriceEntiere tmp = (MatriceEntiere) o;
+        if (this.nbLignes() != tmp.nbLignes() || this.nbColonnes() != tmp.nbColonnes()) return false;
+        for (int i = 0; i < this.nbLignes(); i++) {
+            for (int j = 0; j < this.nbColonnes(); j++) {
+                if (this.getElem(i, j) != tmp.getElem(i, j)) return false;
+            }
+        }
+        return true;
+    }
 }
