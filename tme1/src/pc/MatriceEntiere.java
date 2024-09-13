@@ -84,10 +84,13 @@ public class MatriceEntiere{
     @Override
 	public String toString(){
         String res = "";
+        res+=this.nbLignes()+"\n"+this.nbColonnes()+"\n";
+        
         for (int i=0; i<nbLignes(); i++){
             for (int j=0; j<nbColonnes(); j++){
-                res+=getElem(i, j);
+                res+=getElem(i, j)+" ";
             }
+            res+="\n";
         }
         return res;
     }
@@ -108,9 +111,9 @@ public class MatriceEntiere{
         return true;
     }
 
-    public MatriceEntiere ajoute(MatriceEntiere m) throws TaillesNonCondordantesException{
+    public MatriceEntiere ajoute(MatriceEntiere m) throws TaillesNonConcordantesException{
         if ((this.nbLignes()!=m.nbLignes()) || (this.nbColonnes()!=m.nbColonnes())){
-            throw new TaillesNonCondordantesException();
+            throw new TaillesNonConcordantesException();
         }
 
         MatriceEntiere res = new MatriceEntiere(nbLignes(), nbColonnes());
@@ -122,9 +125,9 @@ public class MatriceEntiere{
         return res;
     }
 
-    public MatriceEntiere produit(MatriceEntiere m) throws TaillesNonCondordantesException {
-        if ((this.nbLignes() != m.nbColonnes()) || (this.nbColonnes() != m.nbLignes())) {
-            throw new TaillesNonCondordantesException();
+    public MatriceEntiere produit(MatriceEntiere m) throws TaillesNonConcordantesException {
+        if (this.nbColonnes() != m.nbLignes()) {
+            throw new TaillesNonConcordantesException();
         }
         MatriceEntiere res = new MatriceEntiere(this.nbLignes(), m.nbColonnes());
     
