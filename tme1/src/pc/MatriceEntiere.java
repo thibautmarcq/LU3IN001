@@ -1,5 +1,5 @@
 package pc;
-
+import pc.TaillesNonConcordantesException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -96,7 +96,7 @@ public class MatriceEntiere{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !(o instanceof MatriceEntiere)) return false;
-        
+
         // test valeur par valeur
         MatriceEntiere tmp = (MatriceEntiere) o;
         if (this.nbLignes() != tmp.nbLignes() || this.nbColonnes() != tmp.nbColonnes()) return false;
@@ -107,4 +107,50 @@ public class MatriceEntiere{
         }
         return true;
     }
+
+    public MatriceEntiere ajoute(MatriceEntiere m) throws TaillesNonCondordantesException{
+        if ((this.nbLignes()!=m.nbLignes()) || (this.nbColonnes()!=m.nbColonnes())){
+            throw new TaillesNonCondordantesException();
+        }
+
+        MatriceEntiere res = new MatriceEntiere(nbLignes(), nbColonnes());
+        for (int i=0; i<nbLignes(); i++){
+            for (int g=0; g<nbColonnes(); g++){
+                res.setElem(i, g, m.getElem(i, g)+this.getElem(i, g));
+            }
+        }
+        return res;
+    }
+
+    public MatriceEntiere produit(MatriceEntiere m) throws TaillesNonCondordantesException {
+        if ((this.nbLignes() != m.nbColonnes()) || (this.nbColonnes() != m.nbLignes())) {
+            throw new TaillesNonCondordantesException();
+        }
+        MatriceEntiere res = new MatriceEntiere(this.nbLignes(), m.nbColonnes());
+    
+        for (int i = 0; i < this.nbLignes(); i++) {
+            for (int j = 0; j < m.nbColonnes(); j++) {
+                int sum = 0;
+                for (int k = 0; k < this.nbColonnes(); k++) {
+                    sum += this.getElem(i, k) * m.getElem(k, j);
+                }
+                res.setElem(i, j, sum);
+            }
+        }
+    
+        return res;
+    }
+
+
+    public MatriceEntiere transposee() {
+        MatriceEntiere res = new MatriceEntiere(this.nbColonnes(), this.nbLignes());
+        for (int i = 0; i < this.nbLignes(); i++) {
+            for (int j = 0; j < this.nbColonnes(); j++) {
+                res.setElem(j, i, this.getElem(i, j));
+            }
+        }
+        return res;
+    }
+
 }
+
