@@ -156,6 +156,16 @@ public class MatriceEntiere{
         return res;
     }
 
+    public MatriceEntiere produitParScalaire(int n){
+        MatriceEntiere res = new MatriceEntiere(this.nbLignes(), this.nbColonnes());
+        for (int i=0; i<this.nbLignes(); i++){
+            for (int j=0; j<this.nbColonnes(); j++){
+                res.setElem(i, j, getElem(i, j) * n);
+            }
+        }
+        return res;
+    }
+
 
     public MatriceEntiere produitParScalaireMT(int n) {
         MatriceEntiere res = new MatriceEntiere(this.nbLignes(), this.nbColonnes());
@@ -191,6 +201,52 @@ public class MatriceEntiere{
     
         return res;
     }
+
+    public MatriceEntiere produitMT(MatriceEntiere m) throws TaillesNonConcordantesException{
+        if (this.nbLignes()==m.nbColonnes()){
+            throw new TaillesNonConcordantesException();
+        }
+
+        MatriceEntiere res = new MatriceEntiere(this.nbLignes(), m.nbColonnes());
+        ArrayList<Thread> th = new ArrayList<>();
+
+        class CalculCellule extends Thread {
+            private int row;
+            private int column;
+        
+            public CalculCellule(int row, int column) {
+                this.row = row;
+                this.column = column;
+            }
+        
+            @Override
+            public void run() {
+                int cell = 0;
+                for (int id=0; id<nbColonnes(); id++){
+                    cell+=getElem(row, id)*m.getElem(id, column);
+                }
+                res.setElem(row, column, cell);
+            }
+        }
+
+        for (int i=0; i<this.nbLignes(); i++){
+            for (int j=0; j<m.nbColonnes(); j++){
+                Thread t = new Thread(new CalculCellule(i,j));
+                th.add(t);
+                t.start();
+            }
+        }
+        for (Thread t: th){
+            try{
+                t.join();
+            } catch (InterruptedException e){
+                e.getMessage();
+            }
+        }
+        return res;
+    }
+
+
 
 }
 
