@@ -1,5 +1,7 @@
 package pc;
 
+import com.sun.jdi.ThreadReference;
+import java.awt.Container;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
@@ -7,23 +9,24 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import pc.iter.SimpleList;
-import pc.rec.SimpleListRec;
+import pc.iter.SimpleListSync;
+import pc.rec.SimpleListRecSync;
 
 public class TestList {
 
 	@Test
-	public void testSimpleList() {
-		IList<String> list = new SimpleList<>();
+	public void testSimpleListSync() {
+		IList<String> list = new SimpleListSync<>();
 
 		runConcurrentTest(list, 10, 1000);
 	}
 
 	@Test
-	public void testSimpleListRec() {
-		IList<String> list = new SimpleListRec<>();
+	public void testSimpleListRecSync() {
+		IList<String> list = new SimpleListRecSync<>();
 
 		runConcurrentTest(list, 10, 1000);
 	}
@@ -49,30 +52,90 @@ public class TestList {
 
 		long startTime = System.currentTimeMillis();
 
-		List<Thread> threads = new ArrayList<>();
+		List<Thread> threadsAdd = new ArrayList<>();
+		List<Thread> threadsContains = new ArrayList<>();
 
 		// Create threads to add elements to the list
+		class AddListTh implements Runnable{
+			private IList<String> list;
+			private int M;
+
+			public AddListTh(IList<String> list, int M){
+				this.list=list;
+				this.M=M;
+			}
+
+			@Override
+			public void run(){
+				for (int i=0; i<M; i++){
+					list.add(Integer.toString(i));
+				}
+			}
+		}
+
+		for (int i=0; i<N; i++){
+			threadsAdd.add(new Thread(new AddListTh(list, M)));
+			threadsAdd.get(i).start();
+		}
 
 		// Create threads to check contains for non-existent elements
+		class ContainsListTh implements Runnable{
+			private IList<String> list;
+			private int M;
 
+			public ContainsListTh(IList<String> list, int M){
+				this.list=list;
+				this.M=M;
+			}
+
+			@Override
+			public void run(){
+				for (int i=0; i<M; i++){
+					assertFalse(list.contains("coucou"));
+				}
+
+			}
+		}
+
+		for (int i=0; i<N; i++){
+			threadsContains.add(new Thread(new ContainsListTh(list, M)));
+			threadsContains.get(i).start();
+		}
+		
 		// Start all threads
 
 		// Wait for all threads to finish
-
+        for (Thread t : threadsAdd) { /* fin de fonction, on attend que les threads se finissent */
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+		for (Thread t : threadsContains) { /* fin de fonction, on attend que les threads se finissent */
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 		// Check that the list size is N * M
+		Assert.assertEquals(list.size(), N*M);
 		// assertEquals("List size should be N * M", N * M, list.size());
 
 		long endTime = System.currentTimeMillis();
 		System.out.println("Test completed in " + (endTime - startTime) + " milliseconds");
 	}
 
-	// TODO support pour les threads
-	static class AddTask implements Runnable {
 
-		@Override
-		public void run() {
-		}
-	}
+
+	// TODO support pour les threads
+	// static class AddTask implements Runnable {
+
+	// 	@Override
+	// 	public void run() {
+	// 	}
+	// }
 
 }
 
