@@ -2,7 +2,7 @@ package pc.iter;
 
 import pc.IList;
 
-public class SimpleList<T> implements IList<T>{
+public class SimpleListFine<T> implements IList<T>{
 	private Chainon<T> head; // Premier élément de la liste
 
 	private static class Chainon<T> {
@@ -16,58 +16,40 @@ public class SimpleList<T> implements IList<T>{
 
 	}
 
-	public SimpleList() {
+	public SimpleListFine() {
 		head = null;
 	}
 
 	@Override
 	public int size() {
 		int size = 0;
-		Chainon<T> cur;
-		synchronized(this){
-			cur = head;
-		}
-		synchronized(cur){
-			while (cur != null) {
-				size++;
-				cur = cur.next;
-			}
+		Chainon<T> cur = head;
+		while (cur != null) {
+			size++;
+			cur = cur.next;
 		}
 		return size;
 	}
 
 	@Override
 	public void add(T element) {
-		synchronized (this) {
-			if (head == null) {
-				head = new Chainon<>(element);
-				return;
-			}			
+		if (head == null) {
+			head = new Chainon<>(element);
+			return;
 		}
-		Chainon<T> cur=head;
-		while(cur!=null){
-			synchronized (cur) {
-				if (cur.next == null) {
-					cur.next = new Chainon<>(element);
-					break;
-				}
+		for (Chainon<T> cur = head; cur != null; cur = cur.next) {
+			if (cur.next == null) {
+				cur.next = new Chainon<>(element);
+				break;
 			}
-			cur=cur.next;
 		}
 	}
 
 	@Override
 	public boolean contains(T element) {
-		Chainon<T> cur;
-		synchronized(this){
-			cur = head;
-		}
-		while (cur!=null){
-			synchronized(cur){
-				if (cur.data.equals(element)) {
-					return true;
-				}
-			cur=cur.next;
+		for (Chainon<T> cur = head; cur != null; cur = cur.next) {
+			if (cur.data.equals(element)) {
+				return true;
 			}
 		}
 		return false;

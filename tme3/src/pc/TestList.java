@@ -1,7 +1,5 @@
 package pc;
 
-import com.sun.jdi.ThreadReference;
-import java.awt.Container;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
@@ -9,7 +7,6 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import pc.iter.SimpleListSync;
@@ -49,7 +46,7 @@ public class TestList {
 	private void runConcurrentTest(IList<String> list, int N, int M) {
 		System.out.println("Running test of "+list.getClass().getSimpleName());
 		testList(list);
-
+		
 		long startTime = System.currentTimeMillis();
 
 		List<Thread> threadsAdd = new ArrayList<>();
@@ -77,7 +74,7 @@ public class TestList {
 			threadsAdd.add(new Thread(new AddListTh(list, M)));
 			threadsAdd.get(i).start();
 		}
-
+		System.out.println("test");
 		// Create threads to check contains for non-existent elements
 		class ContainsListTh implements Runnable{
 			private IList<String> list;
@@ -120,14 +117,16 @@ public class TestList {
             }
         }
 		// Check that the list size is N * M
-		Assert.assertEquals(list.size(), N*M);
+		assertEquals(list.size(), N*M);
+		System.out.println("Taille de la liste : "+list.size()+ "taille attendue "+N*M);
 		// assertEquals("List size should be N * M", N * M, list.size());
 
 		long endTime = System.currentTimeMillis();
 		System.out.println("Test completed in " + (endTime - startTime) + " milliseconds");
+
+
+
 	}
-
-
 
 	// TODO support pour les threads
 	// static class AddTask implements Runnable {
