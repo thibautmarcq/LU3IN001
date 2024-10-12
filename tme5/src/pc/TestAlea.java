@@ -13,7 +13,7 @@ public class TestAlea {
         }
         
         // Création d'un chariot, 2 chargeurs et 2 déchargeurs
-        Chariot chariot1 = new Chariot(50, 10);
+        Chariot chariot1 = new Chariot(50, 16);
         Chargeur charg1 = new Chargeur(stock, chariot1);
         Chargeur charg2 = new Chargeur(stock, chariot1);
         Dechargeur decharg1 = new Dechargeur(stock, chariot1);
@@ -38,16 +38,16 @@ public class TestAlea {
             e.printStackTrace();
         }
 
+        // decharg1.stop();
         // join
         for (Thread t: th){
             try{
+                // t.interrupt();
                 t.join();
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
         }
     }
-
-
 
 }

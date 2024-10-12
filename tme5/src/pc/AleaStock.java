@@ -26,9 +26,9 @@ public class AleaStock {
 
     public synchronized boolean isEmpty(){
         /* teste si le stock est vide */
-        // if (stock.isEmpty()){
-        //     System.out.println("stock vide");
-        // }
+        if (stock.isEmpty()){
+            System.out.println("stock vide");
+        }
         return stock.isEmpty();
     }
 

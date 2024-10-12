@@ -1,6 +1,5 @@
 package pc;
 
-
 public class Chargeur {
     private final AleaStock stock;
     private final Chariot chariot;
@@ -12,18 +11,16 @@ public class Chargeur {
     }
 
     public void chargerChariot(){
-        while (true){
+        while (!(stock.isEmpty())){
             try {                
-                try {
-                    AleaObjet obj = stock.popAleaObjet();
-                    chariot.insere(obj);                    
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
+                AleaObjet obj = stock.popAleaObjet();
+                chariot.insere(obj);                    
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        System.out.println("Fin chargement chargeur");
     }
 
 
