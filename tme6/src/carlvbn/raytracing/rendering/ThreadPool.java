@@ -32,7 +32,7 @@ public class ThreadPool {
     }
 
     public void submit(Runnable job) throws InterruptedException{
-        jobs.add(job);
+        jobs.put(job);
     }
 
     public void shutdown(){

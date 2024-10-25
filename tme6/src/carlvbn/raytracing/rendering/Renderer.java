@@ -6,6 +6,7 @@ import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import carlvbn.raytracing.math.Ray;
 import carlvbn.raytracing.math.RayHit;
@@ -25,7 +26,9 @@ public class Renderer {
     public static float bloomIntensity = 0.5F;
     public static int bloomRadius = 10;
 
-    private static final ThreadPool threadPool = new ThreadPool(100000, 1000);
+    private static final ThreadPool threadPool = new ThreadPool(1000, 200);
+
+
 
     /** Renders the scene to a Pixel buffer
      * @param scene The scene to Render
@@ -178,38 +181,40 @@ public class Renderer {
     }
 
     public static void renderScene(Scene scene, Graphics gfx, int width, int height, float resolution) {
-        resolution = 0.1f;
-        
+        // resolution = 0.1f;
         int blockSize = (int) (1 / resolution);
         long start = System.currentTimeMillis();
 
+        int numTasks = (width / blockSize) * (height / blockSize);
+        CountDownLatch latch = new CountDownLatch(numTasks);
 
         for (int x = 0; x < width; x += blockSize) {
-            for (int y = 0; y < height; y += blockSize) {
-                final int xf = x;
-                final int yf = y;
-                Runnable rn = () -> {
-                    float[] uv = getNormalizedScreenCoordinates(xf, yf, width, height);
+            final int xf = x;
+            Runnable rn = () -> {
+                for (int y = 0; y < height; y += blockSize) {
+                    float[] uv = getNormalizedScreenCoordinates(xf, y, width, height);
                     PixelData pixelData = computePixelInfo(scene, uv[0], uv[1]);
                     synchronized (gfx) {
                         gfx.setColor(pixelData.getColor().toAWTColor());
-                        gfx.fillRect(xf, yf, blockSize, blockSize);
+                        gfx.fillRect(xf, y, blockSize, blockSize);
                     }
-                };
-                try{
-                    threadPool.submit(rn);
-                } catch (InterruptedException e){
-                    e.printStackTrace();
+                    latch.countDown();
                 }
-            }
+            };
+            try {
+                threadPool.submit(rn);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }        
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        
-
-
         System.out.println("Rendered in " + (System.currentTimeMillis() - start) + "ms");
-    }        
-
+    }
     
 
 
