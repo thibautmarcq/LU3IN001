@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import carlvbn.raytracing.math.Ray;
 import carlvbn.raytracing.math.RayHit;
@@ -27,6 +29,7 @@ public class Renderer {
     public static int bloomRadius = 10;
 
     private static final ThreadPool threadPool = new ThreadPool(1000, 200);
+    private static final ExecutorService exec = Executors.newSingleThreadExecutor();
 
     /** Renders the scene to a Pixel buffer
      * @param scene The scene to Render
@@ -215,7 +218,7 @@ public class Renderer {
         System.out.println("Rendered in " + (System.currentTimeMillis() - start) + "ms");
     }
     
-    public static void renderScene(Scene scene, Graphics gfx, int width, int height, float resolution) {
+    public static void renderScene5(Scene scene, Graphics gfx, int width, int height, float resolution) {
         // Question 8
         resolution = 0.1f;
         int blockSize = (int) (1 / resolution);
@@ -252,7 +255,39 @@ public class Renderer {
         System.out.println("Rendered in " + (System.currentTimeMillis() - start) + "ms");
     }
 
-    
+    public static void renderScene(Scene scene, Graphics gfx, int width, int height, float resolution) {
+        // Question 8
+        // resolution = 0.1f;
+        int blockSize = (int) (1 / resolution);
+        long start = System.currentTimeMillis();
+
+        int numTasks = (width / blockSize) * (height / blockSize);
+        CountDownLatch latch = new CountDownLatch(numTasks);
+
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        for (int x = 0; x < width; x += blockSize) {
+            final int xf = x;
+            Runnable rn = () -> {
+                for (int y = 0; y < height; y += blockSize) {
+                    float[] uv = getNormalizedScreenCoordinates(xf, y, width, height);
+                    PixelData pixelData = computePixelInfo(scene, uv[0], uv[1]);
+                    fillColorRect(image, xf, y, blockSize, blockSize, pixelData.getColor());
+                    latch.countDown();
+                }
+            };
+            exec.submit(rn);
+      
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        gfx.drawImage(image, 0, 0, null);
+
+        System.out.println("Rendered in " + (System.currentTimeMillis() - start) + "ms");
+    }
 
     /** Same as the above but applies Post-Processing effects before drawing. */
     public static void renderScenePostProcessed(Scene scene, Graphics gfx, int width, int height, float resolution) {
