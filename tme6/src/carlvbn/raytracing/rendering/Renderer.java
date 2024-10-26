@@ -28,8 +28,6 @@ public class Renderer {
 
     private static final ThreadPool threadPool = new ThreadPool(1000, 200);
 
-
-
     /** Renders the scene to a Pixel buffer
      * @param scene The scene to Render
      * @param width The width of the desired output
@@ -180,7 +178,8 @@ public class Renderer {
         System.out.println("Rendered in " + (System.currentTimeMillis() - start) + "ms");
     }
 
-    public static void renderScene(Scene scene, Graphics gfx, int width, int height, float resolution) {
+    public static void renderScene4(Scene scene, Graphics gfx, int width, int height, float resolution) {
+        // Question 7
         // resolution = 0.1f;
         int blockSize = (int) (1 / resolution);
         long start = System.currentTimeMillis();
@@ -216,7 +215,44 @@ public class Renderer {
         System.out.println("Rendered in " + (System.currentTimeMillis() - start) + "ms");
     }
     
+    public static void renderScene(Scene scene, Graphics gfx, int width, int height, float resolution) {
+        // Question 8
+        resolution = 0.1f;
+        int blockSize = (int) (1 / resolution);
+        long start = System.currentTimeMillis();
 
+        int numTasks = (width / blockSize) * (height / blockSize);
+        CountDownLatch latch = new CountDownLatch(numTasks);
+
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        for (int x = 0; x < width; x += blockSize) {
+            final int xf = x;
+            Runnable rn = () -> {
+                for (int y = 0; y < height; y += blockSize) {
+                    float[] uv = getNormalizedScreenCoordinates(xf, y, width, height);
+                    PixelData pixelData = computePixelInfo(scene, uv[0], uv[1]);
+                    fillColorRect(image, xf, y, blockSize, blockSize, pixelData.getColor());
+                    latch.countDown();
+                }
+            };
+            try {
+                threadPool.submit(rn);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }        
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        gfx.drawImage(image, 0, 0, null);
+
+        System.out.println("Rendered in " + (System.currentTimeMillis() - start) + "ms");
+    }
+
+    
 
     /** Same as the above but applies Post-Processing effects before drawing. */
     public static void renderScenePostProcessed(Scene scene, Graphics gfx, int width, int height, float resolution) {
