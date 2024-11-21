@@ -22,7 +22,7 @@ public class Settings {
         // Default settings
         panelWidth = 800;
         panelHeight = 600;
-        maxIterations = 5000;
+        maxIterations = 1000;
 
         xmin = -2.5;
         xmax = 1;
