@@ -4,6 +4,7 @@ import java.net.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,6 +47,7 @@ public class WebCrawlerParallel {
             }
 
             BlockingQueue<Pair> bq = new LinkedBlockingQueue<>();
+            ConcurrentHashMap<String, Boolean> visitedUrls = new ConcurrentHashMap<>;
             bq.add(new Pair(baseUrl, 10));
             ExecutorService exec = Executors.newFixedThreadPool(NB_THREADS);
 
@@ -68,10 +70,12 @@ public class WebCrawlerParallel {
     private static class CrawlerTask implements Runnable{
         private final BlockingQueue<Pair> bq;
         private final Path outputDir;
+        private final ConcurrentHashMap<String, Boolean> visitedURLs;
 
-        public CrawlerTask(BlockingQueue<Pair> bq, Path outputDir){
+        public CrawlerTask(BlockingQueue<Pair> bq, Path outputDir, ConcurrentHashMap<String, Boolean> visitedURLs){
             this.bq=bq;
             this.outputDir=outputDir;
+            this.visitedURLs=visitedURLs;
         }
 
         @Override
@@ -81,8 +85,8 @@ public class WebCrawlerParallel {
                     Pair pair=bq.take();
                     String url=pair.getURL();
                     int depth=pair.getDepth();
-
-                    if (depth>=0){
+                    
+                    if (depth>=0 && visitedURLs.putIfAbsent(url, true)==null){ // l'url n'est pas encore dans les URL visités
                         System.out.println("Processing (Depth "+depth+"): " + url);
                         List<String> extractedUrls = Collections.emptyList();
 
