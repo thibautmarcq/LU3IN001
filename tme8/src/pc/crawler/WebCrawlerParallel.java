@@ -47,7 +47,7 @@ public class WebCrawlerParallel {
             }
 
             BlockingQueue<Pair> bq = new LinkedBlockingQueue<>();
-            ConcurrentHashMap<String, Boolean> visitedUrls = new ConcurrentHashMap<>;
+            ConcurrentHashMap<String, Boolean> visitedUrls = new ConcurrentHashMap<>();
             bq.add(new Pair(baseUrl, 10));
             ExecutorService exec = Executors.newFixedThreadPool(NB_THREADS);
 
